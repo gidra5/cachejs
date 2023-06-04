@@ -26,12 +26,12 @@ export const createCacheManagerHooks = <
     const [execute, setExecutor] = useState(executor);
     useEffect(() => {
       const handler = manager.on(
-        'invalidateQuery',
+        'invalidatedQuery',
         (invalidatedQueryName) =>
           invalidatedQueryName === queryName && setExecutor(executor)
       );
 
-      return () => void manager.off('invalidateQuery', handler);
+      return () => void manager.off('invalidatedQuery', handler);
     }, []);
     return execute;
   };
@@ -60,14 +60,14 @@ export const createCacheManagerHooks = <
     const [execute, setExecutor] = useState(executor);
     useEffect(() => {
       const handler = manager.on(
-        'invalidateQuery',
+        'invalidatedQuery',
         (invalidatedQueryName, invalidatedQueryParams) =>
           invalidatedQueryName === queryName &&
           JSON.stringify(params) === JSON.stringify(invalidatedQueryParams) &&
           setExecutor(executor)
       );
 
-      return () => void manager.off('invalidateQuery', handler);
+      return () => void manager.off('invalidatedQuery', handler);
     }, []);
     const queryState = useAsync(execute, [execute, skip, ...deps]);
     return queryState;

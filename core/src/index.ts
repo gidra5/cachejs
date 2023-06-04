@@ -49,7 +49,7 @@ export interface Cache<T extends string> {
 
 interface CacheManagerEvents {
   invalidate(tags: string[], noClearOnInvalidate?: boolean): void;
-  invalidateQuery(
+  invalidatedQuery(
     invalidatedQueryName: string,
     invalidatedQueryParams: unknown[],
     storeValue: unknown,

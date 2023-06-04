@@ -32,7 +32,7 @@ const queryHandler: EndpointHandler = <
 
       manager.off('invalidate', handler);
       manager.emit(
-        'invalidateQuery',
+        'invalidatedQuery',
         queryName,
         params,
         result,
