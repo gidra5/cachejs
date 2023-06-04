@@ -2,11 +2,12 @@ import { EventEmitter } from 'ee-ts';
 import { assert } from './utils.js';
 export * from './handlers.js';
 export * from './cache.js';
+export * from './cachePolicy/index.js';
 
-export interface QueryStorage {
-  get(key: string, params: unknown): unknown;
+export interface QueryStorage<T = unknown> {
+  get(key: string, params: unknown): T;
   has(key: string, params: unknown): boolean;
-  set(key: string, params: unknown, value: unknown): void;
+  set(key: string, params: unknown, value: T): void;
   clear(key: string, params: unknown): void;
 }
 
