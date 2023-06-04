@@ -54,7 +54,7 @@ interface CacheManagerEvents {
     invalidatedQueryParams: unknown[],
     storeValue: unknown,
     invalidatedTags: string[]
-  ): string;
+  ): void;
 }
 
 export class CacheManager<
