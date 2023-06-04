@@ -1,3 +1,5 @@
+/* globals describe it */
+
 // Properties
 describe('less than 64 bytes', function () {
   it('should be successful', function () {
