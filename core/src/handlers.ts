@@ -1,26 +1,20 @@
-import {
-  CacheManager,
-  Endpoint,
-  EndpointHandler,
-  QueryStorage,
-} from './index.js';
+import { CacheManager, Endpoint, EndpointHandler } from './index.js';
 
 const queryHandler: EndpointHandler = <
   T extends string,
   F extends (...p: any[]) => Promise<unknown>
 >(
-  storage: QueryStorage,
   manager: CacheManager,
   queryName: string,
   endpoint: Endpoint<T, F>,
   params: Parameters<F>
 ): ReturnType<F> => {
+  const storage = manager.storage;
   if (storage.has(queryName, params)) {
     return storage.get(queryName, params) as ReturnType<F>;
   }
 
-  return endpoint.request(...params).then((_result) => {
-    const result = _result;
+  return endpoint.request(...params).then((result) => {
     storage.set(queryName, params, result);
 
     const queryTags = endpoint.tags?.(params, result) ?? [];
@@ -52,7 +46,6 @@ const mutationHandler: EndpointHandler = <
   T extends string,
   F extends (...p: any[]) => Promise<unknown>
 >(
-  storage: QueryStorage,
   manager: CacheManager,
   queryName: string,
   endpoint: Endpoint<T, F>,

@@ -1,22 +1,19 @@
-import { QueryStorage } from '../index.js';
+import { TruncatableQueryStorage } from '../index.js';
 import { throttle } from '../utils.js';
 
-export type ResizeCallback = (size?: number) => void;
-
-export const sizedPolicy = (
-  storage: QueryStorage,
-  resize: ResizeCallback,
+export const sizedCache = <T>(
+  storage: TruncatableQueryStorage<T>,
   options: {
     throttle?: number;
     size?: number;
   } = {}
-): QueryStorage => {
+): TruncatableQueryStorage<T> => {
   const maxSize = options.size ?? 100; // Default maximum size of cache
   let currentSize = 0;
 
   const _truncateCache = () => {
     if (currentSize <= maxSize) return;
-    resize(maxSize);
+    storage.truncate(currentSize - maxSize);
     currentSize = maxSize;
   };
 
@@ -27,6 +24,9 @@ export const sizedPolicy = (
   return {
     get(key, params) {
       return storage.get(key, params);
+    },
+    truncate(count) {
+      return storage.truncate(count);
     },
     has(key, params) {
       return storage.has(key, params);

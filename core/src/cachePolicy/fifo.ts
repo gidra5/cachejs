@@ -1,25 +1,15 @@
-import { QueryStorage } from '../index.js';
-import { ResizeCallback } from './sized.js';
+import { QueryStorage, TruncatableQueryStorage } from '../index.js';
 
 export const fifoPolicy = <T>(
   storage: QueryStorage<T>
-): [QueryStorage<T>, ResizeCallback] => {
+): TruncatableQueryStorage<T> => {
   type Entry = { key: string; params: unknown };
   const cache: Map<string, Entry> = new Map();
-
-  const truncateCache = (targetSize: number = cache.size - 1) => {
-    for (const [key, value] of cache.entries()) {
-      if (cache.size <= targetSize) break;
-
-      cache.delete(key);
-      storage.clear(value.key, value.params);
-    }
-  };
 
   const generateKey = (key: string, params: unknown) =>
     JSON.stringify([key, params]);
 
-  const wrappedStorage: QueryStorage<T> = {
+  return {
     has(key, params) {
       return storage.has(key, params);
     },
@@ -36,7 +26,14 @@ export const fifoPolicy = <T>(
       cache.delete(cacheKey);
       storage.clear(key, params);
     },
-  };
+    truncate(count = 1) {
+      for (const [key, value] of [...cache.entries()].reverse()) {
+        if (count <= 0) break;
 
-  return [wrappedStorage, truncateCache];
+        cache.delete(key);
+        storage.clear(value.key, value.params);
+        count--;
+      }
+    },
+  };
 };

@@ -11,6 +11,10 @@ export interface QueryStorage<T = unknown> {
   clear(key: string, params: unknown): void;
 }
 
+export interface TruncatableQueryStorage<T = unknown> extends QueryStorage<T> {
+  truncate(count?: number): void;
+}
+
 type _Endpoint<T extends string, P extends unknown[], R> = {
   type: T;
   request: (...params: P) => Promise<R>;
@@ -32,21 +36,11 @@ export type EndpointHandler = <
   T extends string,
   F extends (...p: any[]) => Promise<unknown>
 >(
-  storage: QueryStorage,
   manager: CacheManager,
   queryName: string,
   endpoint: Endpoint<T, F>,
   params: Parameters<F>
 ) => ReturnType<F>;
-
-export interface Cache<T extends string> {
-  execute<F extends (...p: any[]) => Promise<unknown>>(
-    queryName: string,
-    endpoint: Endpoint<T, F>,
-    params: Parameters<F>
-  ): ReturnType<F>;
-  invalidate(tags: string[]): void;
-}
 
 interface CacheManagerEvents {
   invalidate(tags: string[], noClearOnInvalidate?: boolean): void;
@@ -59,27 +53,31 @@ interface CacheManagerEvents {
 }
 
 export class CacheManager<
-    Handlers extends Record<string, EndpointHandler> = Record<
-      string,
-      EndpointHandler
-    >,
-    Endpoints extends Record<
-      string,
-      Endpoint<keyof Handlers & string, (...p: any[]) => Promise<unknown>>
-    > = Record<
-      string,
-      Endpoint<keyof Handlers & string, (...p: any[]) => Promise<unknown>>
-    >
+  Handlers extends Record<string, EndpointHandler> = Record<
+    string,
+    EndpointHandler
+  >,
+  Endpoints extends Record<
+    string,
+    Endpoint<keyof Handlers & string, (...p: any[]) => Promise<unknown>>
+  > = Record<
+    string,
+    Endpoint<keyof Handlers & string, (...p: any[]) => Promise<unknown>>
   >
-  extends EventEmitter<CacheManagerEvents>
-  implements Cache<keyof Handlers & string>
-{
+> extends EventEmitter<CacheManagerEvents> {
   constructor(
-    private storage: QueryStorage,
+    readonly storage: QueryStorage,
     private handlers: Handlers,
     readonly registry: Endpoints
   ) {
     super();
+  }
+
+  registerHandler<K extends keyof Handlers>(
+    name: K,
+    handler: Handlers[K]
+  ): void {
+    this.handlers[name] = handler;
   }
 
   register<K extends keyof Endpoints>(
@@ -95,8 +93,7 @@ export class CacheManager<
     params: Parameters<F>
   ): ReturnType<F> {
     const handler = this.handlers[endpoint.type];
-    const fetch = async () =>
-      await handler(this.storage, this, queryName, endpoint, params);
+    const fetch = () => handler(this, queryName, endpoint, params);
 
     if (endpoint.optimisticRequest) {
       const result = endpoint.optimisticRequest(this.storage, ...params);
@@ -118,10 +115,5 @@ export class CacheManager<
     assert(typeof queryName === 'string', 'queryName can only be string');
 
     return this.execute(queryName, endpoint as Endpoints[K], params);
-  }
-
-  invalidate(tags: string[]): void {
-    if (tags.length === 0) return;
-    this.emit('invalidate', tags);
   }
 }
