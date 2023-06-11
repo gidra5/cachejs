@@ -35,11 +35,13 @@ export const createCacheManagerHooks = <
     }, []);
     return execute;
   };
+
   const useRequestState = <K extends keyof Endpoints>(queryName: K) => {
     const execute = useRequest(queryName);
     const state = useAsyncFn(execute, [execute]);
     return state;
   };
+
   const useQuery = <K extends keyof Endpoints>(
     queryName: K,
     params: Parameters<Endpoints[K]['request']>,
