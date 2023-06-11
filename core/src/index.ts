@@ -1,7 +1,7 @@
 import { EventEmitter } from 'ee-ts';
 import { assert } from './utils.js';
 import { handlers } from './handlers.js';
-import { GenericQueryStorage } from './index.js';
+import { GenericQueryStorage } from './cache.js';
 export * from './handlers.js';
 export * from './cache.js';
 export * from './cachePolicy/index.js';
