@@ -39,7 +39,7 @@ export const lruPolicy = <T>(
       storage.clear(key, params);
     },
     truncate(count = 1) {
-      for (const [key, value] of [...cache.entries()].reverse()) {
+      for (const [key, value] of cache.entries()) {
         if (count <= 0) break;
 
         cache.delete(key);
