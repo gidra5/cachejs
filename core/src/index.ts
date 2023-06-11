@@ -1,5 +1,7 @@
 import { EventEmitter } from 'ee-ts';
 import { assert } from './utils.js';
+import { handlers } from './handlers.js';
+import { GenericQueryStorage } from './index.js';
 export * from './handlers.js';
 export * from './cache.js';
 export * from './cachePolicy/index.js';
@@ -115,5 +117,16 @@ export class CacheManager<
     assert(typeof queryName === 'string', 'queryName can only be string');
 
     return this.execute(queryName, endpoint as Endpoints[K], params);
+  }
+}
+
+export class GenericCacheManager<
+  Endpoints extends Record<
+    string,
+    Endpoint<keyof typeof handlers & string, (...p: any[]) => Promise<unknown>>
+  >
+> extends CacheManager<typeof handlers, Endpoints> {
+  constructor(endpoints: Endpoints) {
+    super(new GenericQueryStorage(), handlers, endpoints);
   }
 }

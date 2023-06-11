@@ -1,4 +1,4 @@
-import { CacheManager, Endpoint, QueryStorage, handlers } from './index.js';
+import { QueryStorage } from './index.js';
 
 export class GenericQueryStorage<T = unknown> implements QueryStorage<T> {
   private store: Record<string, Map<string, T>> = {};
@@ -22,19 +22,3 @@ export class GenericQueryStorage<T = unknown> implements QueryStorage<T> {
     query.delete(paramsKey);
   }
 }
-
-export const createCacheManager = <
-  Endpoints extends Record<
-    string,
-    Endpoint<keyof typeof handlers, (...p: any[]) => Promise<unknown | void>>
-  >
->(
-  endpoints: Endpoints
-): CacheManager<typeof handlers, Endpoints> => {
-  const manager = new CacheManager(
-    new GenericQueryStorage(),
-    handlers,
-    endpoints
-  );
-  return manager;
-};
