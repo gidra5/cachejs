@@ -26,13 +26,8 @@ export default [
     ],
     output: [
       {
-        file: 'dist/index.esm.js',
-        format: 'esm',
-        exports: 'named',
-      },
-      {
-        file: 'dist/index.cjs.js',
-        format: 'cjs',
+        file: 'dist/index.iife.js',
+        format: 'iife',
         exports: 'named',
       },
     ],

@@ -1,20 +1,17 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import express from 'express';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const esmHtmlPath = path.resolve(dir, '../test/test.esm.html');
-const cjsHtmlPath = path.resolve(dir, '../test/test.cjs.html');
+const PORT = 8000;
 
-test('esm has 0 failures', async ({ page }) => {
-  await page.goto('file://' + esmHtmlPath);
+test('has 0 failures', async ({ page }) => {
+  const app = express();
+  app.use(express.static(path.resolve(dir, '..')));
+  app.listen(PORT);
 
-  const failures = page.locator('li.failures em');
-  await expect(failures).toHaveText('0');
-});
-
-test('cjs has 0 failures', async ({ page }) => {
-  await page.goto('file://' + cjsHtmlPath);
+  await page.goto(`http://localhost:${PORT}/test/test.esm.html`);
 
   const failures = page.locator('li.failures em');
   await expect(failures).toHaveText('0');
