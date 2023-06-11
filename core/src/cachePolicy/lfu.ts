@@ -44,7 +44,7 @@ export const lfuPolicy = <T>(
       storage.clear(key, params);
     },
     truncate(count = 1) {
-      const spliced = items.splice(count);
+      const spliced = items.splice(0, count);
       for (const { key, params } of spliced) storage.clear(key, params);
     },
   };
