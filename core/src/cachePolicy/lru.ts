@@ -13,8 +13,8 @@ export const lruPolicy = <T>(
 
     // map entries are iterated in order of insertion
     // so we re-set key to move it to the end
-    cache.delete(key);
-    cache.set(key, entry);
+    cache.delete(cacheKey);
+    cache.set(cacheKey, entry);
   };
 
   const generateKey = (key: string, params: unknown) =>
