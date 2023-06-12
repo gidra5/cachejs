@@ -16,7 +16,7 @@ export default defineConfig({
       enabled: reportName === 'node',
       provider: 'istanbul',
       reportsDirectory: 'test-results/coverage',
-      reporter: 'html',
+      reporter: ['html'],
     },
     outputFile: `test-results/report-${reportName}-${new Date().toISOString()}/index.html`,
     reporters: ['html'],
