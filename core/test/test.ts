@@ -976,3 +976,60 @@ describe('ttl policy', () => {
     }
   );
 });
+
+describe('sized cache', () => {
+  const { sizedCache } = cachejs;
+
+  policyRespectsParentStorage(sizedCache);
+
+  vi.useFakeTimers();
+
+  it('truncate calls the truncate method on storage', () => {
+    const storageMock = {
+      get: vi.fn(),
+      truncate: vi.fn(),
+      has: vi.fn(),
+      set: vi.fn(),
+      clear: vi.fn(),
+    };
+
+    const cache = sizedCache(storageMock);
+
+    const count = 5;
+
+    cache.truncate(count);
+
+    expect(storageMock.truncate).toHaveBeenCalledWith(count);
+  });
+
+  it.prop([
+    fc.string(),
+    fc.array(fc.anything()),
+    fc.anything(),
+    fc.dictionary(fc.string(), fc.nat(), { maxKeys: 3, minKeys: 3 }),
+  ])(
+    'set truncates only when overflow',
+    (queryKey, queryParams, queryValue, dict) => {
+      const storageMock = {
+        get: vi.fn(),
+        truncate: vi.fn(),
+        has: vi.fn(),
+        set: vi.fn(),
+        clear: vi.fn(),
+      };
+      const keys = Object.keys(dict);
+      const size = keys.length;
+      const cache = sizedCache(storageMock, { size });
+
+      for (const key of keys) {
+        cache.set(key, queryParams, dict[key]);
+      }
+
+      expect(storageMock.truncate).not.toHaveBeenCalled();
+
+      cache.set(queryKey, queryParams, queryValue);
+
+      expect(storageMock.truncate).toHaveBeenCalledWith(1);
+    }
+  );
+});
