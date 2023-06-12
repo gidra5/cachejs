@@ -885,7 +885,7 @@ describe('mru policy', () => {
   );
 });
 
-describe.only('ttl policy', () => {
+describe('ttl policy', () => {
   const { ttlPolicy } = cachejs;
 
   policyRespectsParentStorage(ttlPolicy);
